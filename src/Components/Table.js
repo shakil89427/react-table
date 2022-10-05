@@ -1,5 +1,11 @@
 import React, { useMemo } from "react";
-import { useTable, useSortBy, useGlobalFilter, useFilters } from "react-table";
+import {
+  useTable,
+  useSortBy,
+  useGlobalFilter,
+  useFilters,
+  usePagination,
+} from "react-table";
 import { columnsData } from "../Constants/columnsData";
 import mockData from "../Constants/mockData.json";
 import GlobalFilter from "./GlobalFilter";
@@ -13,19 +19,32 @@ const Table = () => {
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
+    //rows,if pagination not required.globalfilter will work
+    //page,if pagination required.globalfilter will not work
+    page,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    pageOptions,
+    gotoPage,
+    pageCount,
+    setPageSize,
     prepareRow,
     state,
     setGlobalFilter,
   } = useTable(
-    { columns, data, defaultColumn },
+    { columns, data, defaultColumn, initialState: { pageIndex: 4 } },
     useGlobalFilter,
     useFilters,
-    useSortBy
+    useSortBy,
+    usePagination
   );
 
+  const { pageIndex, pageSize } = state;
+
   return (
-    <div>
+    <>
       <GlobalFilter filter={state.globalFilter} setFilter={setGlobalFilter} />
       <table {...getTableProps()}>
         {/* Head */}
@@ -51,7 +70,7 @@ const Table = () => {
         </thead>
         {/* Body */}
         <tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
+          {page.map((row) => {
             prepareRow(row);
             return (
               <tr {...row.getRowProps()}>
@@ -63,7 +82,45 @@ const Table = () => {
           })}
         </tbody>
       </table>
-    </div>
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <span>
+          Page {pageIndex + 1} of {pageOptions.length}{" "}
+        </span>
+        <span>
+          | Go to page:{" "}
+          <input
+            type="number"
+            defaultValue={pageIndex + 1}
+            onChange={(e) => {
+              gotoPage(e.target.value ? Number(e.target.value) - 1 : 0);
+            }}
+            style={{ width: "40px" }}
+          />
+        </span>
+        <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+          {"<<"}
+        </button>
+        <button onClick={previousPage} disabled={!canPreviousPage}>
+          Previous
+        </button>
+        <button onClick={nextPage} disabled={!canNextPage}>
+          Next
+        </button>
+        <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          {">>"}
+        </button>
+        <select
+          value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}
+        >
+          {[10, 25, 50].map((size) => (
+            <option key={size} value={size}>
+              Show {size} data per page
+            </option>
+          ))}
+        </select>
+      </div>
+    </>
   );
 };
 
