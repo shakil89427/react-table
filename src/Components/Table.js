@@ -82,6 +82,8 @@ const Table = () => {
           })}
         </tbody>
       </table>
+
+      {/* Bottom actions */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <span>
           Page {pageIndex + 1} of {pageOptions.length}{" "}
