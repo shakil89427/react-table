@@ -17,11 +17,13 @@ export const columnsData = [
   {
     Header: "Phone",
     accessor: "phone",
+    disableFilters: true,
   },
   {
     Header: "Date Of Birth",
     accessor: "dateOfBirth",
     Cell: ({ value }) => moment(value).format("DD-MM-YYYY"),
+    disableFilters: true,
   },
   {
     Header: "Country",
@@ -65,4 +67,21 @@ export const groupedColumnsData = [
       },
     ],
   },
+];
+
+export const orderData1 = [
+  "id",
+  "firstName",
+  "lastName",
+  "phone",
+  "dateOfBirth",
+  "country",
+];
+export const orderData2 = [
+  "id",
+  "firstName",
+  "lastName",
+  "country",
+  "phone",
+  "dateOfBirth",
 ];

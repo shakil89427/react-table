@@ -1,17 +1,19 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   useTable,
   useSortBy,
   useGlobalFilter,
   useFilters,
   usePagination,
+  useColumnOrder,
 } from "react-table";
-import { columnsData } from "../Constants/columnsData";
+import { columnsData, orderData1, orderData2 } from "../Constants/columnsData";
 import mockData from "../Constants/mockData.json";
 import GlobalFilter from "./GlobalFilter";
 import ColumnFilter from "./ColumnFilter";
 
 const Table = () => {
+  const [ordered, setOrdered] = useState(false);
   const columns = useMemo(() => columnsData, []);
   const data = useMemo(() => mockData, []);
   const defaultColumn = useMemo(() => ({ Filter: ColumnFilter }), []);
@@ -33,19 +35,21 @@ const Table = () => {
     prepareRow,
     state,
     setGlobalFilter,
+    setColumnOrder,
   } = useTable(
     { columns, data, defaultColumn, initialState: { pageIndex: 4 } },
     useGlobalFilter,
     useFilters,
     useSortBy,
-    usePagination
+    usePagination,
+    useColumnOrder
   );
-
-  const { pageIndex, pageSize } = state;
 
   return (
     <>
       <GlobalFilter filter={state.globalFilter} setFilter={setGlobalFilter} />
+
+      {/* -------------------------- */}
       <table {...getTableProps()}>
         {/* Head */}
         <thead>
@@ -83,22 +87,28 @@ const Table = () => {
         </tbody>
       </table>
 
-      {/* Bottom actions */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+      {/* -------------------------- */}
+      <div style={{ textAlign: "center", margin: "20px 0" }}>
+        {/* Page status */}
         <span>
-          Page {pageIndex + 1} of {pageOptions.length}{" "}
+          Page {state.pageIndex + 1} of {pageOptions.length}{" "}
         </span>
-        <span>
+
+        {/* Goto page */}
+        <form
+          style={{ display: "inline" }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            gotoPage(e.target[0].value ? e.target[0].value - 1 : 0);
+            e.target.reset();
+          }}
+        >
           | Go to page:{" "}
-          <input
-            type="number"
-            defaultValue={pageIndex + 1}
-            onChange={(e) => {
-              gotoPage(e.target.value ? Number(e.target.value) - 1 : 0);
-            }}
-            style={{ width: "40px" }}
-          />
-        </span>
+          <input type="number" required style={{ width: "40px" }} />
+          <button type="submit">Go</button>
+        </form>
+
+        {/* Page navigator */}
         <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
           {"<<"}
         </button>
@@ -111,9 +121,11 @@ const Table = () => {
         <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
           {">>"}
         </button>
+
+        {/* Change page size */}
         <select
-          value={pageSize}
-          onChange={(e) => setPageSize(Number(e.target.value))}
+          value={state.pageSize}
+          onChange={(e) => setPageSize(e.target.value)}
         >
           {[10, 25, 50].map((size) => (
             <option key={size} value={size}>
@@ -121,6 +133,21 @@ const Table = () => {
             </option>
           ))}
         </select>
+
+        {/* change column order */}
+        <button
+          onClick={() => {
+            if (ordered) {
+              setColumnOrder(orderData1);
+              setOrdered(false);
+            } else {
+              setColumnOrder(orderData2);
+              setOrdered(true);
+            }
+          }}
+        >
+          Change Column Order
+        </button>
       </div>
     </>
   );
